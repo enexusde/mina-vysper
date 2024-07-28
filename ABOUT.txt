@@ -1,4 +1,4 @@
-** ABOUT Apache Vysper and XMPP **
+ ** ABOUT Apache Vysper and XMPP **
 
 This project aims at delivering a server implementation of both the core and IM parts of the XMPP protocol 
 (as specified in RFCs 3920 [1] + 3921 [2]).
