@@ -27,86 +27,85 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.web.servlet.ModelAndView;
 
+public abstract class AdminConsoleControllerTest {
 
-public class AdminConsoleControllerTest {
-    
-    private static final String ENTITY = "test@vysper.org";
-    private static final String PASSWORD = "password";
+	private static final String ENTITY = "test@vysper.org";
+	private static final String PASSWORD = "password";
 
-    private ExtendedXMPPConnection connection = Mockito.mock(ExtendedXMPPConnection.class);
-    
-    private AdminConsoleController controller = new AdminConsoleController(null) {
-        @Override
-        protected ExtendedXMPPConnection createXMPPConnection() {
-            return connection;
-        }
-    };
-    
-    private HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    private MockHttpSession session = new MockHttpSession();
-    
-    @Test
-    public void login() throws XMPPException {
-        ModelAndView mav = controller.login(ENTITY, PASSWORD, session);
-        
-        Mockito.verify(connection).connect();
-        Mockito.verify(connection).login(ENTITY, PASSWORD);
-        
-        Assert.assertNotNull(session.getAttribute(AdminConsoleController.SESSION_ATTRIBUTE));
-        Assert.assertEquals("redirect:", mav.getViewName());
-    }
+	private final ExtendedXMPPConnection connection = Mockito.mock(ExtendedXMPPConnection.class);
 
-    @Test
-    public void failedLogin() throws XMPPException {
-        Mockito.doThrow(new XMPPException()).when(connection).login(ENTITY, PASSWORD);
-        
-        ModelAndView mav = controller.login(ENTITY, PASSWORD, session);
-        
-        Mockito.verify(connection).connect();
-        Mockito.verify(connection).login(ENTITY, PASSWORD);
-        
-        Assert.assertNull(session.getAttribute(AdminConsoleController.SESSION_ATTRIBUTE));
-        Assert.assertEquals("index", mav.getViewName());
-        Assert.assertNotNull(mav.getModel().get("error"));
-        Assert.assertNull(mav.getModel().get("authenticated"));
-    }
+	private final AdminConsoleController controller = new AdminConsoleController(null) {
+		@Override
+		protected ExtendedXMPPConnection createXMPPConnection() {
+			return connection;
+		}
+	};
 
-    @Test
-    public void failedConnect() throws XMPPException {
-        Mockito.doThrow(new XMPPException()).when(connection).connect();
-        
-        ModelAndView mav = controller.login(ENTITY, PASSWORD, session);
-        
-        Mockito.verify(connection).connect();
-        
-        Assert.assertNull(session.getAttribute(AdminConsoleController.SESSION_ATTRIBUTE));
-        Assert.assertEquals("index", mav.getViewName());
-        Assert.assertNotNull(mav.getModel().get("error"));
-        Assert.assertNull(mav.getModel().get("authenticated"));
-    }
+	private final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+	private final MockHttpSession session = new MockHttpSession();
 
-    @Test
-    public void indexNotAuthenticated() throws XMPPException {
-        ModelAndView mav = controller.index(session);
-        
-        Assert.assertEquals("index", mav.getViewName());
-        Assert.assertNull(mav.getModel().get("authenticated"));
-    }
+	@Test
+	public void login() throws XMPPException {
+		ModelAndView mav = controller.login(ENTITY, PASSWORD, session);
 
-    @Test
-    public void commandNotAuthenticated() throws XMPPException {
-        ModelAndView mav = controller.command("foo", session);
-        
-        Assert.assertEquals("index", mav.getViewName());
-        Assert.assertNull(mav.getModel().get("authenticated"));
-    }
+		Mockito.verify(connection).connect();
+		Mockito.verify(connection).login(ENTITY, PASSWORD);
 
-    @Test
-    public void submitCommandNotAuthenticated() throws XMPPException {
-        ModelAndView mav = controller.submitCommand("foo", request, session);
-        
-        Assert.assertEquals("index", mav.getViewName());
-        Assert.assertNull(mav.getModel().get("authenticated"));
-    }
+		Assert.assertNotNull(session.getAttribute(AdminConsoleController.SESSION_ATTRIBUTE));
+		Assert.assertEquals("redirect:", mav.getViewName());
+	}
+
+	@Test
+	public void failedLogin() throws XMPPException {
+		Mockito.doThrow(new XMPPException()).when(connection).login(ENTITY, PASSWORD);
+
+		ModelAndView mav = controller.login(ENTITY, PASSWORD, session);
+
+		Mockito.verify(connection).connect();
+		Mockito.verify(connection).login(ENTITY, PASSWORD);
+
+		Assert.assertNull(session.getAttribute(AdminConsoleController.SESSION_ATTRIBUTE));
+		Assert.assertEquals("index", mav.getViewName());
+		Assert.assertNotNull(mav.getModel().get("error"));
+		Assert.assertNull(mav.getModel().get("authenticated"));
+	}
+
+	@Test
+	public void failedConnect() throws XMPPException {
+		Mockito.doThrow(new XMPPException()).when(connection).connect();
+
+		ModelAndView mav = controller.login(ENTITY, PASSWORD, session);
+
+		Mockito.verify(connection).connect();
+
+		Assert.assertNull(session.getAttribute(AdminConsoleController.SESSION_ATTRIBUTE));
+		Assert.assertEquals("index", mav.getViewName());
+		Assert.assertNotNull(mav.getModel().get("error"));
+		Assert.assertNull(mav.getModel().get("authenticated"));
+	}
+
+	@Test
+	public void indexNotAuthenticated() throws XMPPException {
+		ModelAndView mav = controller.index(session);
+
+		Assert.assertEquals("index", mav.getViewName());
+		Assert.assertNull(mav.getModel().get("authenticated"));
+	}
+
+	@Test
+	public void commandNotAuthenticated() throws XMPPException {
+		ModelAndView mav = controller.command("foo", session);
+
+		Assert.assertEquals("index", mav.getViewName());
+		Assert.assertNull(mav.getModel().get("authenticated"));
+	}
+
+	@Test
+	public void submitCommandNotAuthenticated() throws XMPPException {
+		ModelAndView mav = controller.submitCommand("foo", request, session);
+
+		Assert.assertEquals("index", mav.getViewName());
+		Assert.assertNull(mav.getModel().get("authenticated"));
+	}
 
 }

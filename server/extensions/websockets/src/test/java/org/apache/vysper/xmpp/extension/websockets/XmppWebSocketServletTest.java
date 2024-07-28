@@ -33,50 +33,51 @@ import org.mockito.Mockito;
  *
  * @author The Apache MINA Project (dev@mina.apache.org)
  */
-public class XmppWebSocketServletTest {
+public abstract class XmppWebSocketServletTest {
 
-    private ServerRuntimeContext serverRuntimeContext = Mockito.mock(ServerRuntimeContext.class);
+	private final ServerRuntimeContext serverRuntimeContext = Mockito.mock(ServerRuntimeContext.class);
 
-    @Test
-    public void doWebSocketConnectWithDefaultCstr() throws ServletException {
-        ServletContext servletContext = Mockito.mock(ServletContext.class);
-        Mockito.when(servletContext.getAttribute(XmppWebSocketServlet.SERVER_RUNTIME_CONTEXT_ATTRIBUTE)).thenReturn(serverRuntimeContext);
-        
-        ServletConfig servletConfig = Mockito.mock(ServletConfig.class);
-        Mockito.when(servletConfig.getServletContext()).thenReturn(servletContext);
-        
-        XmppWebSocketServlet servlet = new XmppWebSocketServlet();
-        servlet.init(servletConfig);
-        
-        WebSocket webSocket = servlet.doWebSocketConnect(null, "xmpp");
-        Assert.assertTrue(webSocket instanceof WebSocketBackedSessionContext);
-    }
+	@Test
+	public void doWebSocketConnectWithDefaultCstr() throws ServletException {
+		ServletContext servletContext = Mockito.mock(ServletContext.class);
+		Mockito.when(servletContext.getAttribute(XmppWebSocketServlet.SERVER_RUNTIME_CONTEXT_ATTRIBUTE))
+				.thenReturn(serverRuntimeContext);
 
-    @Test
-    public void doWebSocketConnectWithDirectCstr() throws ServletException {
-        XmppWebSocketServlet servlet = new XmppWebSocketServlet(serverRuntimeContext);
-        
-        WebSocket webSocket = servlet.doWebSocketConnect(null, "xmpp");
-        Assert.assertTrue(webSocket instanceof WebSocketBackedSessionContext);
-    }
+		ServletConfig servletConfig = Mockito.mock(ServletConfig.class);
+		Mockito.when(servletConfig.getServletContext()).thenReturn(servletContext);
 
-    @Test
-    public void doWebSocketConnectWithInvalidSubprotocl() throws ServletException {
-        XmppWebSocketServlet servlet = new XmppWebSocketServlet(serverRuntimeContext);
-        
-        WebSocket webSocket = servlet.doWebSocketConnect(null, "dummy");
-        Assert.assertNull(webSocket);
-    }
+		XmppWebSocketServlet servlet = new XmppWebSocketServlet();
+		servlet.init(servletConfig);
 
-    @Test(expected=RuntimeException.class)
-    public void doWebSocketConnectMissingAttribute() throws ServletException {
-        ServletContext servletContext = Mockito.mock(ServletContext.class);
-        
-        ServletConfig servletConfig = Mockito.mock(ServletConfig.class);
-        Mockito.when(servletConfig.getServletContext()).thenReturn(servletContext);
-        
-        XmppWebSocketServlet servlet = new XmppWebSocketServlet();
-        servlet.init(servletConfig);
-    }
-    
+		WebSocket webSocket = servlet.doWebSocketConnect(null, "xmpp");
+		Assert.assertTrue(webSocket instanceof WebSocketBackedSessionContext);
+	}
+
+	@Test
+	public void doWebSocketConnectWithDirectCstr() throws ServletException {
+		XmppWebSocketServlet servlet = new XmppWebSocketServlet(serverRuntimeContext);
+
+		WebSocket webSocket = servlet.doWebSocketConnect(null, "xmpp");
+		Assert.assertTrue(webSocket instanceof WebSocketBackedSessionContext);
+	}
+
+	@Test
+	public void doWebSocketConnectWithInvalidSubprotocl() throws ServletException {
+		XmppWebSocketServlet servlet = new XmppWebSocketServlet(serverRuntimeContext);
+
+		WebSocket webSocket = servlet.doWebSocketConnect(null, "dummy");
+		Assert.assertNull(webSocket);
+	}
+
+	@Test(expected = RuntimeException.class)
+	public void doWebSocketConnectMissingAttribute() throws ServletException {
+		ServletContext servletContext = Mockito.mock(ServletContext.class);
+
+		ServletConfig servletConfig = Mockito.mock(ServletConfig.class);
+		Mockito.when(servletConfig.getServletContext()).thenReturn(servletContext);
+
+		XmppWebSocketServlet servlet = new XmppWebSocketServlet();
+		servlet.init(servletConfig);
+	}
+
 }

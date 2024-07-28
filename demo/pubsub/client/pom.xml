@@ -34,7 +34,7 @@
   <repositories>
     <repository>
       <id>smackx-pubsub-repo</id>
-      <url>http://people.apache.org/~ngn/vysper-repo/</url>
+      <url>https://people.apache.org/~ngn/vysper-repo/</url>
     </repository>
   </repositories>
 
@@ -63,10 +63,6 @@
       <plugins>
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
-          <configuration>
-            <source>${maven.compile.source}</source>
-            <target>${maven.compile.target}</target>
-          </configuration>
         </plugin>
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
@@ -82,9 +78,4 @@
       </plugins>
     </pluginManagement>
   </build>
-
-  <properties>
-    <maven.compile.source>1.5</maven.compile.source>
-    <maven.compile.target>1.5</maven.compile.target>
-  </properties>
 </project>

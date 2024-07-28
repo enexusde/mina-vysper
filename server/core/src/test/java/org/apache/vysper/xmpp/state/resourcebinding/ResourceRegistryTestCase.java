@@ -40,7 +40,7 @@ public class ResourceRegistryTestCase extends TestCase {
         try {
             resourceRegistry.bindSession(sessionContext);
             fail("do not accept sessions with no initiating entity");
-        } catch (IllegalStateException _) {
+        } catch (IllegalStateException excp) {
             // test succeeded
         }
     }

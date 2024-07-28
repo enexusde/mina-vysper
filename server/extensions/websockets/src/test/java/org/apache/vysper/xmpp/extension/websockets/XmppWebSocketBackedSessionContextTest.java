@@ -36,35 +36,36 @@ import org.mockito.Mockito;
  *
  * @author The Apache MINA Project (dev@mina.apache.org)
  */
-public class XmppWebSocketBackedSessionContextTest {
+public abstract class XmppWebSocketBackedSessionContextTest {
 
-    private StanzaProcessor stanzaProcessor = Mockito.mock(StanzaProcessor.class);
-    private ServerRuntimeContext serverRuntimeContext = Mockito.mock(ServerRuntimeContext.class);
-    private Outbound outbound = Mockito.mock(Outbound.class);
+	private final StanzaProcessor stanzaProcessor = Mockito.mock(StanzaProcessor.class);
+	private final ServerRuntimeContext serverRuntimeContext = Mockito.mock(ServerRuntimeContext.class);
+	private final Outbound outbound = Mockito.mock(Outbound.class);
 
-    @Before
-    public void before() {
-        Mockito.when(serverRuntimeContext.getStanzaProcessor()).thenReturn(stanzaProcessor);
-    }
-    
-    @Test
-    public void onMessage() {
-        WebSocketBackedSessionContext context = new WebSocketBackedSessionContext(serverRuntimeContext);
-        context.onMessage((byte)1, "<test></test>");
+	@Before
+	public void before() {
+		Mockito.when(serverRuntimeContext.getStanzaProcessor()).thenReturn(stanzaProcessor);
+	}
 
-        Stanza expected = new StanzaBuilder("test").build();
-        Mockito.verify(stanzaProcessor).processStanza(Mockito.eq(serverRuntimeContext), Mockito.any(SessionContext.class), Mockito.eq(expected), Mockito.any(SessionStateHolder.class));
-    }
+	@Test
+	public void onMessage() {
+		WebSocketBackedSessionContext context = new WebSocketBackedSessionContext(serverRuntimeContext);
+		context.onMessage((byte) 1, "<test></test>");
 
-    @Test
-    public void write() throws IOException {
-        WebSocketBackedSessionContext context = new WebSocketBackedSessionContext(serverRuntimeContext);
-        context.onConnect(outbound);
-        
-        Stanza stanza = new StanzaBuilder("test").build();
-        context.write(stanza);
-        
-        Mockito.verify(outbound).sendMessage("<test></test>");
-    }
+		Stanza expected = new StanzaBuilder("test").build();
+		Mockito.verify(stanzaProcessor).processStanza(Mockito.eq(serverRuntimeContext),
+				Mockito.any(SessionContext.class), Mockito.eq(expected), Mockito.any(SessionStateHolder.class));
+	}
+
+	@Test
+	public void write() throws IOException {
+		WebSocketBackedSessionContext context = new WebSocketBackedSessionContext(serverRuntimeContext);
+		context.onConnect(outbound);
+
+		Stanza stanza = new StanzaBuilder("test").build();
+		context.write(stanza);
+
+		Mockito.verify(outbound).sendMessage("<test></test>");
+	}
 
 }

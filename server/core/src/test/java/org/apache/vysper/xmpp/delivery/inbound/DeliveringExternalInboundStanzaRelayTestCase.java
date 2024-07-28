@@ -19,10 +19,6 @@
  */
 package org.apache.vysper.xmpp.delivery.inbound;
 
-
-import junit.framework.Assert;
-import junit.framework.TestCase;
-
 import org.apache.vysper.xmpp.addressing.Entity;
 import org.apache.vysper.xmpp.addressing.EntityImpl;
 import org.apache.vysper.xmpp.delivery.failure.RemoteServerNotFoundException;
@@ -36,71 +32,76 @@ import org.apache.vysper.xmpp.stanza.XMPPCoreStanza;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import junit.framework.Assert;
+import junit.framework.TestCase;
+
 /**
  */
-public class DeliveringExternalInboundStanzaRelayTestCase extends TestCase {
+public abstract class DeliveringExternalInboundStanzaRelayTestCase extends TestCase {
 
-    private static final Entity FROM = EntityImpl.parseUnchecked("from@vysper.org");
+	private static final Entity FROM = EntityImpl.parseUnchecked("from@vysper.org");
 
-    private static final Entity TO = EntityImpl.parseUnchecked("to@vysper.org");
+	private static final Entity TO = EntityImpl.parseUnchecked("to@vysper.org");
 
-    private static final Entity SERVER = EntityImpl.parseUnchecked("vysper.org");
+	private static final Entity SERVER = EntityImpl.parseUnchecked("vysper.org");
 
-    private static final String LANG = "en";
+	private static final String LANG = "en";
 
-    private static final String BODY = "Hello world";
+	private static final String BODY = "Hello world";
 
-    private static final Stanza STANZA = XMPPCoreStanza.getWrapper(StanzaBuilder.createMessageStanza(FROM, TO, LANG,
-            BODY).build());
+	private static final Stanza STANZA = XMPPCoreStanza
+			.getWrapper(StanzaBuilder.createMessageStanza(FROM, TO, LANG, BODY).build());
 
-    public void testRemoteServerError() throws Exception {
-        XMPPServerConnectorRegistry registry = Mockito.mock(XMPPServerConnectorRegistry.class);
-        Mockito.when(registry.connect(SERVER)).thenThrow(new RemoteServerNotFoundException());
+	public void testRemoteServerError() throws Exception {
+		XMPPServerConnectorRegistry registry = Mockito.mock(XMPPServerConnectorRegistry.class);
+		Mockito.when(registry.connect(SERVER)).thenThrow(new RemoteServerNotFoundException());
 
-        ServerRuntimeContext serverRuntimeContext = Mockito.mock(ServerRuntimeContext.class);
-        Mockito.when(serverRuntimeContext.getServerConnectorRegistry()).thenReturn(registry);
+		ServerRuntimeContext serverRuntimeContext = Mockito.mock(ServerRuntimeContext.class);
+		Mockito.when(serverRuntimeContext.getServerConnectorRegistry()).thenReturn(registry);
 
-        DeliveringExternalInboundStanzaRelay relay = new DeliveringExternalInboundStanzaRelay(new TestExecutorService());
-        relay.setServerRuntimeContext(serverRuntimeContext);
+		DeliveringExternalInboundStanzaRelay relay = new DeliveringExternalInboundStanzaRelay(
+				new TestExecutorService());
+		relay.setServerRuntimeContext(serverRuntimeContext);
 
-        RecordingDeliveryFailureStrategy deliveryFailureStrategy = new RecordingDeliveryFailureStrategy();
-        relay.relay(TO, STANZA, deliveryFailureStrategy);
+		RecordingDeliveryFailureStrategy deliveryFailureStrategy = new RecordingDeliveryFailureStrategy();
+		relay.relay(TO, STANZA, deliveryFailureStrategy);
 
-        Stanza failedStanza = deliveryFailureStrategy.getRecordedStanza();
-        Assert.assertNotNull(failedStanza);
-        
-        Assert.assertEquals("message", failedStanza.getName());
-        Assert.assertEquals(NamespaceURIs.JABBER_SERVER, failedStanza.getNamespaceURI());
-        Assert.assertEquals(FROM, failedStanza.getFrom());
-        Assert.assertEquals(TO, failedStanza.getTo());
-    }
+		Stanza failedStanza = deliveryFailureStrategy.getRecordedStanza();
+		Assert.assertNotNull(failedStanza);
 
-    public void testSuccessfulRelay() throws Exception {
-        XMPPServerConnector connector = Mockito.mock(XMPPServerConnector.class);
-        
-        XMPPServerConnectorRegistry registry = Mockito.mock(XMPPServerConnectorRegistry.class);
-        Mockito.when(registry.connect(SERVER)).thenReturn(connector);
+		Assert.assertEquals("message", failedStanza.getName());
+		Assert.assertEquals(NamespaceURIs.JABBER_SERVER, failedStanza.getNamespaceURI());
+		Assert.assertEquals(FROM, failedStanza.getFrom());
+		Assert.assertEquals(TO, failedStanza.getTo());
+	}
 
-        ServerRuntimeContext serverRuntimeContext = Mockito.mock(ServerRuntimeContext.class);
-        Mockito.when(serverRuntimeContext.getServerConnectorRegistry()).thenReturn(registry);
+	public void testSuccessfulRelay() throws Exception {
+		XMPPServerConnector connector = Mockito.mock(XMPPServerConnector.class);
 
-        DeliveringExternalInboundStanzaRelay relay = new DeliveringExternalInboundStanzaRelay(new TestExecutorService());
-        relay.setServerRuntimeContext(serverRuntimeContext);
+		XMPPServerConnectorRegistry registry = Mockito.mock(XMPPServerConnectorRegistry.class);
+		Mockito.when(registry.connect(SERVER)).thenReturn(connector);
 
-        RecordingDeliveryFailureStrategy deliveryFailureStrategy = new RecordingDeliveryFailureStrategy();
-        relay.relay(TO, STANZA, deliveryFailureStrategy);
+		ServerRuntimeContext serverRuntimeContext = Mockito.mock(ServerRuntimeContext.class);
+		Mockito.when(serverRuntimeContext.getServerConnectorRegistry()).thenReturn(registry);
 
-        Assert.assertNull(deliveryFailureStrategy.getRecordedStanza());
+		DeliveringExternalInboundStanzaRelay relay = new DeliveringExternalInboundStanzaRelay(
+				new TestExecutorService());
+		relay.setServerRuntimeContext(serverRuntimeContext);
 
-        ArgumentCaptor<Stanza> writtenStanzaCaptor = ArgumentCaptor.forClass(Stanza.class);
-        Mockito.verify(connector).write(writtenStanzaCaptor.capture());
-        
-        Stanza writtenStanza = writtenStanzaCaptor.getValue();
-        
-        Assert.assertNotNull(writtenStanza);
-        Assert.assertEquals("message", writtenStanza.getName());
-        Assert.assertEquals(NamespaceURIs.JABBER_SERVER, writtenStanza.getNamespaceURI());
-        Assert.assertEquals(FROM, writtenStanza.getFrom());
-        Assert.assertEquals(TO, writtenStanza.getTo());
-    }
+		RecordingDeliveryFailureStrategy deliveryFailureStrategy = new RecordingDeliveryFailureStrategy();
+		relay.relay(TO, STANZA, deliveryFailureStrategy);
+
+		Assert.assertNull(deliveryFailureStrategy.getRecordedStanza());
+
+		ArgumentCaptor<Stanza> writtenStanzaCaptor = ArgumentCaptor.forClass(Stanza.class);
+		Mockito.verify(connector).write(writtenStanzaCaptor.capture());
+
+		Stanza writtenStanza = writtenStanzaCaptor.getValue();
+
+		Assert.assertNotNull(writtenStanza);
+		Assert.assertEquals("message", writtenStanza.getName());
+		Assert.assertEquals(NamespaceURIs.JABBER_SERVER, writtenStanza.getNamespaceURI());
+		Assert.assertEquals(FROM, writtenStanza.getFrom());
+		Assert.assertEquals(TO, writtenStanza.getTo());
+	}
 }

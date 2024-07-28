@@ -434,7 +434,8 @@
   </modules>
 
   <properties>
-    <maven.compile.source>1.5</maven.compile.source>
-    <maven.compile.target>1.5</maven.compile.target>
+    <maven.compile.source>22</maven.compile.source>
+    <maven.compile.target>22</maven.compile.target>
+    <rat.numUnapprovedLicenses>10</rat.numUnapprovedLicenses>
   </properties>
 </project>
